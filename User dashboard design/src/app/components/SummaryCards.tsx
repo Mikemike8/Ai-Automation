@@ -1,43 +1,50 @@
 import { AlertTriangle, Copy, Columns3, FileWarning } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Progress } from "./ui/progress";
+import { ValidationReport } from "../lib/validation";
+import { AiInsights } from "../lib/ai";
 
-const issueTypes = [
-  {
-    title: "Missing Columns",
-    count: 234,
-    total: 15247,
-    icon: Columns3,
-    color: "text-orange-600",
-    bgColor: "bg-orange-100 dark:bg-orange-950",
-  },
-  {
-    title: "Duplicate Rows",
-    count: 145,
-    total: 15247,
-    icon: Copy,
-    color: "text-blue-600",
-    bgColor: "bg-blue-100 dark:bg-blue-950",
-  },
-  {
-    title: "Invalid Data",
-    count: 89,
-    total: 15247,
-    icon: AlertTriangle,
-    color: "text-red-600",
-    bgColor: "bg-red-100 dark:bg-red-950",
-  },
-  {
-    title: "Format Errors",
-    count: 67,
-    total: 15247,
-    icon: FileWarning,
-    color: "text-yellow-600",
-    bgColor: "bg-yellow-100 dark:bg-yellow-950",
-  },
-];
+interface SummaryCardsProps {
+  report: ValidationReport;
+  aiInsights: AiInsights;
+}
 
-export function SummaryCards() {
+export function SummaryCards({ report, aiInsights }: SummaryCardsProps) {
+  const issueTypes = [
+    {
+      title: "Missing Columns",
+      count: report.issues.filter((issue) => issue.type === "missing_column" || issue.type === "missing_value").length,
+      total: Math.max(report.totalRows, 1),
+      icon: Columns3,
+      color: "text-orange-600",
+      bgColor: "bg-orange-100",
+    },
+    {
+      title: "Duplicate Rows",
+      count: report.issues.filter((issue) => issue.type === "duplicate").length + aiInsights.fuzzyDuplicates.length,
+      total: Math.max(report.totalRows, 1),
+      icon: Copy,
+      color: "text-blue-600",
+      bgColor: "bg-blue-100",
+    },
+    {
+      title: "Invalid Emails",
+      count: report.issues.filter((issue) => issue.type === "invalid_email").length,
+      total: Math.max(report.totalRows, 1),
+      icon: AlertTriangle,
+      color: "text-red-600",
+      bgColor: "bg-red-100",
+    },
+    {
+      title: "Phone Errors",
+      count: report.issues.filter((issue) => issue.type === "invalid_phone").length,
+      total: Math.max(report.totalRows, 1),
+      icon: FileWarning,
+      color: "text-yellow-600",
+      bgColor: "bg-yellow-100",
+    },
+  ];
+
   return (
     <div className="my-6">
       <h2 className="mb-4">Data Quality Issues</h2>
@@ -59,7 +66,7 @@ export function SummaryCards() {
                 <div className="mt-2 space-y-1">
                   <Progress value={parseFloat(percentage)} className="h-2" />
                   <p className="text-xs text-muted-foreground">
-                    {percentage}% of total entries
+                    {percentage}% of current rows
                   </p>
                 </div>
               </CardContent>
