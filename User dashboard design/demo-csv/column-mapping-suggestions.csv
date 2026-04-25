@@ -1,0 +1,4 @@
+record_key,client_full_name,primary_email,telephone
+E-101,Ada Lovelace,ada@example.com,+15555550101
+E-102,Ada Lovelace,ada.lovelace@example.com,+15555550102
+E-103,Katherine Johnson,katherine@example.com,+15555550103

@@ -7,12 +7,24 @@ import { Badge } from "./ui/badge";
 interface AiSuggestionsPanelProps {
   aiInsights: AiInsights;
   acceptedMappings: Record<string, string>;
+  aiElapsedMs: number | null;
+  isAiRunning: boolean;
   onAcceptMapping: (sourceHeader: string, suggestedField: string) => void;
+}
+
+function formatDuration(milliseconds: number) {
+  if (milliseconds < 1000) {
+    return `${milliseconds} ms`;
+  }
+
+  return `${(milliseconds / 1000).toFixed(1)} sec`;
 }
 
 export function AiSuggestionsPanel({
   aiInsights,
   acceptedMappings,
+  aiElapsedMs,
+  isAiRunning,
   onAcceptMapping,
 }: AiSuggestionsPanelProps) {
   return (
@@ -28,6 +40,10 @@ export function AiSuggestionsPanel({
           <Badge variant="outline" className="gap-1.5">
             <Brain className="h-3.5 w-3.5" />
             {aiInsights.provider === "huggingface" ? "Hugging Face Active" : "Fallback Heuristics Active"}
+          </Badge>
+          <Badge variant={isAiRunning ? "secondary" : "outline"} className="gap-1.5">
+            {isAiRunning ? "AI response running" : "Last AI response"}
+            {aiElapsedMs !== null ? `: ${formatDuration(aiElapsedMs)}` : ": not run yet"}
           </Badge>
         </div>
       </CardHeader>

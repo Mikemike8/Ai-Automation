@@ -36,6 +36,20 @@ export default function App() {
   const [validationMode, setValidationMode] = useState<"api" | "local">("local");
   const [selectedFilename, setSelectedFilename] = useState("sample.csv");
   const [acceptedMappings, setAcceptedMappings] = useState<Record<string, string>>({});
+  const [aiElapsedMs, setAiElapsedMs] = useState<number | null>(null);
+  const [aiStartedAt, setAiStartedAt] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (aiStartedAt === null) {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setAiElapsedMs(Date.now() - aiStartedAt);
+    }, 100);
+
+    return () => window.clearInterval(timer);
+  }, [aiStartedAt]);
 
   async function importCsvFile(file: File) {
     const contents = await file.text();
@@ -58,7 +72,12 @@ export default function App() {
 
   async function runValidation(nextCsv: string, mappingOverrides?: Record<string, string>) {
     setIsValidating(true);
+    const startedAt = Date.now();
+    setAiStartedAt(startedAt);
+    setAiElapsedMs(0);
     const result = await validateCsvWithApi(nextCsv, mappingOverrides);
+    setAiElapsedMs(Date.now() - startedAt);
+    setAiStartedAt(null);
     setIngestion(result.ingestion);
     setAiInsights(result.ai);
     setReport(result.report);
@@ -127,6 +146,8 @@ export default function App() {
           <AiSuggestionsPanel
             aiInsights={aiInsights}
             acceptedMappings={acceptedMappings}
+            aiElapsedMs={aiElapsedMs}
+            isAiRunning={isValidating}
             onAcceptMapping={(sourceHeader, suggestedField) => {
               const nextMappings = {
                 ...acceptedMappings,

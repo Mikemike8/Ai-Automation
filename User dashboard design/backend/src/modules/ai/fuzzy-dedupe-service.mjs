@@ -13,17 +13,25 @@ function similarity(a, b) {
     return 1;
   }
 
-  const shorter = a.length <= b.length ? a : b;
-  const longer = a.length > b.length ? a : b;
+  const distances = Array.from({ length: a.length + 1 }, (_, index) => [index]);
 
-  let matches = 0;
-  for (const char of shorter) {
-    if (longer.includes(char)) {
-      matches += 1;
+  for (let column = 1; column <= b.length; column += 1) {
+    distances[0][column] = column;
+  }
+
+  for (let row = 1; row <= a.length; row += 1) {
+    for (let column = 1; column <= b.length; column += 1) {
+      const cost = a[row - 1] === b[column - 1] ? 0 : 1;
+      distances[row][column] = Math.min(
+        distances[row - 1][column] + 1,
+        distances[row][column - 1] + 1,
+        distances[row - 1][column - 1] + cost,
+      );
     }
   }
 
-  return matches / longer.length;
+  const maxLength = Math.max(a.length, b.length);
+  return 1 - distances[a.length][b.length] / maxLength;
 }
 
 export function detectFuzzyDuplicates(rows) {
